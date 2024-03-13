@@ -1,0 +1,42 @@
+{
+  "name": "vue-tabled",
+  "version": "1.0.0",
+  "description": "A Vue.js table component",
+  "main": "./dist/vue-tabled.umd.js",
+  "module": "./dist/vue-tabled.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/vue-tabled.es.js",
+      "require": "./dist/vue-tabled.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "serve": "vite preview"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "table",
+    "vuetable"
+  ],
+  "author": "Victor Pereira",
+  "license": "MIT",
+  "homepage": "https://github.com/ovictorpereira/vue-tabled",
+  "peerDependencies": {
+    "vue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.2.4",
+    "typescript": "^4.3.5",
+    "vite": "^2.3.7",
+    "vite-plugin-dts": "^0.17.0",
+    "vue": "^3.0.0"
+  }
+}
