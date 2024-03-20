@@ -1,9 +1,11 @@
 <template>
   <div class="tabled-responsive">
-    <table class="tabled" :class="[props.bordered ? 'tabled-bordered' : '', props.striped ? 'tabled-striped' : '', props.hover ? 'tabled-hover' : '']">
+    <table class="tabled"
+      :class="[props.bordered ? 'tabled-bordered' : '', props.striped ? 'tabled-striped' : '', props.hover ? 'tabled-hover' : '']">
       <thead>
         <tr>
-          <th scope="col" v-for="(field, index) in props.fields" :key="index" :class="field.class" @click="sortColumn(field)">
+          <th scope="col" v-for="(field, index) in props.fields" :key="index" :class="field.class"
+            @click="sortColumn(field)">
             <span :class="field.sortable ? 'sort-by' : ''">{{ field.label }}</span>
           </th>
         </tr>
@@ -17,7 +19,7 @@
               <slot :name="field.key" :row="item" :value="item[field.key]" :key="field.key" :index="index"></slot>
             </span>
 
-            <span v-else>{{ item[field.key] }}</span>            
+            <span v-else>{{ item[field.key] }}</span>
           </td>
         </tr>
       </tbody>
@@ -25,47 +27,30 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const props = defineProps({
-  items: {
-    type: Array,
-    default: []
-  },
-  fields: {
-    type: Array,
-    default: []
-  },
-  filter: {
-    type: String,
-    default: ''
-  },
-  bordered: {
-    type: Boolean,
-    default: false
-  },
-  bordered: {
-    type: Boolean,
-    default: false
-  },
-  striped: {
-    type: Boolean,
-    default: false
-  },
-  hover: {
-    type: Boolean,
-    default: false
-  },
-  perPage: {
-    type: Number,
-    default: 0
-  },
-  currentPage: {
-    type: Number,
-    default: 1
-  },
-})
+interface Props {
+    items: any;
+    fields: any;
+    filter: string;
+    bordered: boolean;
+    striped: boolean;
+    hover: boolean;
+    perPage: number;
+    currentPage: number;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    items: [],
+    fields: [],
+    filter: '',
+    bordered: false,
+    striped: false,
+    hover: false,
+    perPage: 0,
+    currentPage: 0,
+});
 
 const emit = defineEmits(['onFiltered'])
 
@@ -98,13 +83,11 @@ const filteredTable = computed(() => {
   return result
 })
 
-const sortColumn = (field) => {
+const sortColumn = (field: any) => {
   if (!field.sortable) return
   else {
     if (sortField.value == field.key) {
       sortReverse.value = !sortReverse.value
-      console.log('aqui');
-      console.log(sortReverse.value);
     }
     else {
       sortReverse.value = false
@@ -118,12 +101,15 @@ const sortedTable = computed(() => {
   let reverse = sortReverse.value
   if (!key) return [...filteredTable.value]
 
-  let result = [...filteredTable.value].sort((a, b) => (a[key] > b[key]) - (a[key] < b[key]))
+  // let result = [...filteredTable.value].sort((a, b) => (a[key] > b[key]) - (a[key] < b[key]))
+  let result = [...filteredTable.value].sort((a, b) => (a[key] > b[key] as any) - (a[key] < b[key] as any))
+
   if (reverse) result = result.reverse()
   // let result = items.sort((a, b) => (a[key] < b[key]) - (a[key] > b[key]))
 
   return result
 })
+
 
 const paginationFilter = computed(() => {
   let items = [...sortedTable.value]
@@ -180,29 +166,32 @@ const paginationFilter = computed(() => {
   background-color: #00000013;
 }
 
-.tabled th .sort-by { 
-	position: relative;
+.tabled th .sort-by {
+  position: relative;
   display: block;
-	width: 100%;
+  width: 100%;
   cursor: pointer;
 }
+
 .tabled .sort-by:before,
 .tabled .sort-by:after {
-	border: 4px solid transparent;
-	content: "";
-	display: block;
-	height: 0;
-	right: 5px;
-	top: 50%;
-	position: absolute;
-	width: 0;
+  border: 4px solid transparent;
+  content: "";
+  display: block;
+  height: 0;
+  right: 5px;
+  top: 50%;
+  position: absolute;
+  width: 0;
 }
+
 .tabled .sort-by:before {
-	border-bottom-color: #666;
-	margin-top: -9px;
+  border-bottom-color: #666;
+  margin-top: -9px;
 }
+
 .tabled .sort-by:after {
-	border-top-color: #666;
-	margin-top: 1px;
+  border-top-color: #666;
+  margin-top: 1px;
 }
 </style>

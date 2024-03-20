@@ -1,42 +1,58 @@
 {
   "name": "vue-tabled",
-  "version": "1.0.0",
   "description": "A Vue.js table component",
-  "main": "./dist/vue-tabled.umd.js",
-  "module": "./dist/vue-tabled.es.js",
-  "exports": {
-    ".": {
-      "import": "./dist/vue-tabled.es.js",
-      "require": "./dist/vue-tabled.umd.js"
-    },
-    "./dist/style.css": "./dist/style.css"
+  "author": "Victor Pereira",
+  "license": "MIT",
+  "private": false,
+  "version": "1.0.1",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ovictorpereira/vue-tabled.git"
   },
-  "files": [
-    "dist",
-    "src"
-  ],
-  "scripts": {
-    "build": "vite build",
-    "dev": "vite",
-    "serve": "vite preview"
-  },
+  "homepage": "https://github.com/ovictorpereira/vue-tabled",
   "keywords": [
     "vue",
     "vue3",
-    "table",
-    "vuetable"
+    "pagination",
+    "paginate",
+    "library",
+    "vue-tabled"
   ],
-  "author": "Victor Pereira",
-  "license": "MIT",
-  "homepage": "https://github.com/ovictorpereira/vue-tabled",
+  "files": [
+    "dist",
+    "src/components/"
+  ],
+  "main": "./dist/vue-tabled.umd.cjs",
+  "module": "./dist/vue-tabled.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/vue-tabled.js",
+      "require": "./dist/vue-tabled.umd.cjs"
+    },
+    "./dist/style.css": {
+      "import": "./dist/style.css",
+      "require": "./dist/style.css"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.2.47"
+  },
   "peerDependencies": {
     "vue": "^3.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^1.2.4",
-    "typescript": "^4.3.5",
-    "vite": "^2.3.7",
-    "vite-plugin-dts": "^0.17.0",
-    "vue": "^3.0.0"
+    "@vitejs/plugin-vue": "^4.1.0",
+    "path": "^0.12.7",
+    "typescript": "^5.0.2",
+    "vite": "^4.3.9",
+    "vite-plugin-dts": "^2.3.0",
+    "vue-tsc": "^1.4.2"
   }
 }

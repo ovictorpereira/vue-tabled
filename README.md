@@ -6,18 +6,27 @@ NPM
 ```bash
 $ npm install vue-tabled
 ``` 
-Register the component
+
+Register the component globally...
 ```js
 import { createApp } from 'vue'
 import App from './App.vue'
 
-import VueTabled from 'vue-tabled'
+import { VueTabled } from 'vue-tabled';
 import 'vue-tabled/dist/style.css'
+// don't forget to load the css file
 
 createApp(App)
-.use(VueTabled)
+.component('VueTabled', VueTabled)
 .mount('#app')
+``` 
 
+... or import it locally
+```js
+<script setup>
+import { VueTabled } from 'vue-tabled';
+import 'vue-tabled/dist/style.css'
+</script>
 ``` 
 
 ## Usage
