@@ -1,6 +1,8 @@
 # vue-tabled
 A Vue.js table component. (**Compatible with Vue.js 3**)
 
+#### [Sandbox](https://codesandbox.io/p/sandbox/vue-tabled-and-vue-pagination-f4l5x3?file=%2Fsrc%2FApp.vue "Sandbox")
+
 ## Installation
 NPM
 ```bash
