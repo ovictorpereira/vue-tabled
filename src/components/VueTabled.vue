@@ -31,25 +31,25 @@
 import { ref, computed } from 'vue'
 
 interface Props {
-    items: any;
-    fields: any;
-    filter: string;
-    bordered: boolean;
-    striped: boolean;
-    hover: boolean;
-    perPage: number;
-    currentPage: number;
+  items: any;
+  fields: any;
+  filter?: string;
+  bordered?: boolean;
+  striped?: boolean;
+  hover?: boolean;
+  perPage?: number;
+  currentPage?: number;
 }
 
 const props = withDefaults(defineProps<Props>(), {
-    items: [],
-    fields: [],
-    filter: '',
-    bordered: false,
-    striped: false,
-    hover: false,
-    perPage: 0,
-    currentPage: 0,
+  items: [],
+  fields: [],
+  filter: '',
+  bordered: false,
+  striped: false,
+  hover: false,
+  perPage: 0,
+  currentPage: 0,
 });
 
 const emit = defineEmits(['onFiltered'])
@@ -101,11 +101,8 @@ const sortedTable = computed(() => {
   let reverse = sortReverse.value
   if (!key) return [...filteredTable.value]
 
-  // let result = [...filteredTable.value].sort((a, b) => (a[key] > b[key]) - (a[key] < b[key]))
   let result = [...filteredTable.value].sort((a, b) => (a[key] > b[key] as any) - (a[key] < b[key] as any))
-
   if (reverse) result = result.reverse()
-  // let result = items.sort((a, b) => (a[key] < b[key]) - (a[key] > b[key]))
 
   return result
 })
