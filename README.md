@@ -81,21 +81,21 @@ const fields = ref([
     :filter="filter"
     @onFiltered="onFiltered"
 >
-	<template #name="row">
-		{{ row.value.toUpperCase() }}
-	</template>
+  <template #name="row">
+    {{ row.value.toUpperCase() }}
+  </template>
 
-	  <template #actions="row">
-		  <button @click="row.toggleDetails(row.index)">
-			{{ row.item._showDetails ? 'Hide' : 'Show' }} Details
-		  </button>
-	</template>
+  <template #actions="row">
+    <button @click="row.toggleDetails(row.index)">
+      {{ row.item._showDetails ? 'Hide' : 'Show' }} Details
+    </button>
+  </template>
 
-	<template #row-details="row">
-		<ul>
-			<li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value }}</li>
-		</ul>
-	</template>
+  <template #row-details="row">
+    <ul>
+      <li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value }}</li>
+    </ul>
+  </template>
 </VueTabled>
 
 <VueBasicPagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
