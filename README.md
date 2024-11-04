@@ -81,9 +81,21 @@ const fields = ref([
     :filter="filter"
     @onFiltered="onFiltered"
 >
-     <template #name="row">
-        {{ row.value.toUpperCase() }}
-      </template>
+	<template #name="row">
+		{{ row.value.toUpperCase() }}
+	</template>
+
+	  <template #actions="row">
+		  <button @click="row.toggleDetails(row.index)">
+			{{ row.item._showDetails ? 'Hide' : 'Show' }} Details
+		  </button>
+	</template>
+
+	<template #row-details="row">
+		<ul>
+			<li v-for="(value, key) in row.item" :key="key">{{ key }}: {{ value }}</li>
+		</ul>
+	</template>
 </VueTabled>
 
 <VueBasicPagination :total-rows="totalRows" :per-page="perPage" v-model="currentPage" />
@@ -119,17 +131,21 @@ const items = ref([
 ])
 
 const fields = ref([
-    {
-        key: 'name',
-        label: 'Username',
-        sortable: true,
-        class: 'text-center'
-    },
-    {
-        key: 'age',
-        label: 'Age',
-        class: 'text-center'
-    },
+	{
+		key: 'name',
+		label: 'Username',
+		sortable: true,
+		class: 'text-center'
+	},
+	{
+		key: 'age',
+		label: 'Age',
+		class: 'text-center'
+	},
+	{
+		key: 'actions',
+		label: 'Actions'
+	}
 ])
 </script>
 ```

@@ -12,23 +12,39 @@
       </thead>
 
       <tbody>
-        <tr v-for="(item, index) in paginationFilter" :key="index">
-          <td v-for="(field, ind) in props.fields" :key="ind" :class="field.class">
 
-            <span v-if="$slots[field.key]">
-              <slot :name="field.key" :row="item" :value="item[field.key]" :key="field.key" :index="index"></slot>
-            </span>
+        <template v-for="(item, index) in paginationFilter" :key="index">
+          <tr :class="item._showDetails ? 'tabledRowHasDetails' : ''">
+            <td v-for="(field, ind) in props.fields" :key="ind" :class="field.class">
 
-            <span v-else>{{ item[field.key] }}</span>
-          </td>
-        </tr>
+              <span v-if="$slots[field.key]">
+                <slot :name="field.key" :item="item" :value="item[field.key]" :key="field.key" :index="index" :toggleDetails="toggleDetails"></slot>
+              </span>
+
+              <span v-else>{{ item[field.key] }}</span>
+
+            </td>
+          </tr>
+
+          <tr v-if="item._showDetails" class="tabled-details">
+            <td :colspan="fields.length">
+              <div class="tabled-details-card">
+                <slot name="row-details" :item="item">              
+                </slot>
+              </div>
+            </td>
+          </tr>
+        </template>
+
+        
       </tbody>
     </table>
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 
 interface Props {
   items: any;
@@ -52,18 +68,35 @@ const props = withDefaults(defineProps<Props>(), {
   currentPage: 0,
 });
 
+onMounted(() => {
+  mountNewItems()
+})
+
+watch(
+  () => props.items,
+  (v) => {
+    mountNewItems()
+  }
+)
+
+const newItems = ref<Array<any>>([])
+
+const mountNewItems = () => {
+  newItems.value = props.items.map((i: any) => ({...i, _showDetails: false}))
+}
+
 const emit = defineEmits(['onFiltered'])
 
 const sortField = ref('')
 const sortReverse = ref(false)
 
 const filteredTable = computed(() => {
-  let items = [...props.items]
+  let items = [...newItems.value]
   let fields = [...props.fields]
 
   if (!props.filter) {
-    emit("onFiltered", props.items);
-    return props.items
+    emit("onFiltered", newItems.value);
+    return newItems.value
   }
 
   let result = items.filter(i => {
@@ -115,6 +148,9 @@ const paginationFilter = computed(() => {
   return items.slice((props.currentPage - 1) * props.perPage, props.currentPage * props.perPage);
 })
 
+const toggleDetails = (index:number) => {
+  newItems.value[index]._showDetails = !newItems.value[index]._showDetails
+}
 
 </script>
 
@@ -190,5 +226,27 @@ const paginationFilter = computed(() => {
 .tabled .sort-by:after {
   border-top-color: #666;
   margin-top: 1px;
+}
+
+.tabledRowHasDetails {
+  border-bottom: 0!important;
+}
+
+.tabled-details {
+  border: 0!important;
+}
+
+.tabled-details-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0, 0, 0, .125);
+    border-radius: .25rem;
+    flex: 1 1 auto;
+    padding: 1rem;
 }
 </style>
