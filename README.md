@@ -177,3 +177,4 @@ VueTabled works fine with the pagination plugin [vue-basic-pagination](https://g
 | hover       | Boolean |
 | perPage     | Number  |
 | currentPage | Number  |
+| noResults   | String  |
