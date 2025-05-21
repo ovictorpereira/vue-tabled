@@ -102,7 +102,8 @@ watch(
   () => props.items,
   (v) => {
     mountNewItems();
-  }
+  },
+  { deep: true }
 );
 
 const newItems = ref<Array<any>>([]);
