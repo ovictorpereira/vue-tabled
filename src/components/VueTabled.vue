@@ -3,9 +3,9 @@
     <table
       class="tabled"
       :class="[
-        props.bordered ? 'tabled-bordered' : '',
-        props.striped ? 'tabled-striped' : '',
-        props.hover ? 'tabled-hover' : '',
+        { 'tabled-bordered': props.bordered },
+        { 'tabled-striped': props.striped },
+        { 'tabled-hover': props.hover },
       ]"
     >
       <thead>
@@ -26,7 +26,12 @@
 
       <tbody>
         <template v-for="(item, index) in paginationFilter" :key="index">
-          <tr :class="item._showDetails ? 'tabledRowHasDetails' : ''">
+          <tr
+            :class="[
+              { tabledRowHasDetails: item._showDetails },
+              item._rowClass,
+            ]"
+          >
             <td
               v-for="(field, ind) in props.fields"
               :key="ind"

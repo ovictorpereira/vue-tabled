@@ -139,7 +139,8 @@ const items = ref([
     },
      {
         name: 'Alex Turner',
-        age: 12
+        age: 12,
+        _rowClass: 'bg-blue'
     },
 ])
 
