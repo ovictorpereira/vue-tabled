@@ -150,8 +150,10 @@ const isScrollingSyncronized = ref(false);
 onMounted(() => {
   mountNewItems();
   if (props.topScroll) {
-    updateScrollState();
-    window.addEventListener("resize", updateScrollState);
+    nextTick(() => {
+      updateScrollState();
+      window.addEventListener("resize", updateScrollState);
+    });
   }
 });
 
@@ -172,6 +174,20 @@ watch(
     }
   },
   { deep: true }
+);
+
+watch(
+  () => props.topScroll,
+  (newValue) => {
+    if (newValue) {
+      nextTick(() => {
+        updateScrollState();
+        window.addEventListener("resize", updateScrollState);
+      });
+    } else {
+      window.removeEventListener("resize", updateScrollState);
+    }
+  }
 );
 
 const newItems = ref<TableItem[]>([]);
@@ -299,6 +315,18 @@ const paginationFilter = computed(() => {
     props.currentPage * props.perPage
   );
 });
+
+// Watch para atualizar o scroll quando a paginação mudar
+watch(
+  () => paginationFilter.value,
+  () => {
+    if (props.topScroll) {
+      nextTick(() => {
+        updateScrollState();
+      });
+    }
+  }
+);
 
 const toggleDetails = (item: TableItem) => {
   const originalIndex = newItems.value.findIndex(
