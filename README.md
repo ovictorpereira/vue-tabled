@@ -12,6 +12,7 @@ A modern, feature-rich Vue.js table component with built-in sorting, filtering, 
 - ✅ **Expandable row details** - Show/hide additional row information
 - ✅ **Customizable slots** - Full control over column and row rendering
 - ✅ **Responsive design** - Mobile-friendly with horizontal scrolling
+- ✅ **Top scroll bar** - Optional synchronized top scroll for wide tables
 - ✅ **Bootstrap-like styling** - Bordered, striped, and hover effects
 - ✅ **TypeScript support** - Full type definitions included
 - ✅ **No results message** - Customizable empty state
@@ -107,6 +108,7 @@ const fields = ref([
 
   <!-- Table with all features enabled -->
   <VueTabled
+    topScroll
     bordered
     hover
     striped
@@ -273,21 +275,48 @@ VueTabled works seamlessly with [vue-basic-pagination](https://github.com/ovicto
 npm install vue-basic-pagination
 ```
 
+## Top Scroll Bar Feature
+
+For tables with many columns that require horizontal scrolling, you can enable a synchronized top scroll bar using the `topScroll` prop. This improves user experience by allowing users to scroll the table from the top without having to scroll down to the bottom of the table.
+
+### Usage
+
+```vue
+<template>
+  <VueTabled topScroll bordered hover :items="items" :fields="fields" />
+</template>
+```
+
+### How it works
+
+- The top scroll bar automatically appears only when the table width exceeds the container width
+- Both scroll bars (top and bottom) are synchronized - scrolling one will scroll the other
+- The feature is responsive and updates on window resize
+- When the table fits within the container, the top scroll bar is automatically hidden
+
+### Benefits
+
+- **Better UX**: Users don't need to scroll to the bottom to navigate wide tables
+- **Responsive**: Automatically adapts to container and table size changes
+- **Synchronized**: Smooth bidirectional scroll synchronization
+- **Performance**: Efficient scroll handling with debounce mechanism
+
 ## API Reference
 
 ### Props
 
-| Prop          | Type      | Default | Description                                    |
-| ------------- | --------- | ------- | ---------------------------------------------- |
-| `items`       | `Array`   | `[]`    | Array of objects to display in the table       |
-| `fields`      | `Array`   | `[]`    | Array of field configurations defining columns |
-| `filter`      | `String`  | `""`    | Search string to filter table data             |
-| `bordered`    | `Boolean` | `false` | Add borders to table cells                     |
-| `striped`     | `Boolean` | `false` | Add zebra striping to table rows               |
-| `hover`       | `Boolean` | `false` | Add hover effect to table rows                 |
-| `perPage`     | `Number`  | `0`     | Number of items per page (0 = no pagination)   |
-| `currentPage` | `Number`  | `0`     | Current active page                            |
-| `noResults`   | `String`  | `""`    | Message to show when no data matches filter    |
+| Prop          | Type      | Default | Description                                        |
+| ------------- | --------- | ------- | -------------------------------------------------- |
+| `items`       | `Array`   | `[]`    | Array of objects to display in the table           |
+| `fields`      | `Array`   | `[]`    | Array of field configurations defining columns     |
+| `filter`      | `String`  | `""`    | Search string to filter table data                 |
+| `bordered`    | `Boolean` | `false` | Add borders to table cells                         |
+| `striped`     | `Boolean` | `false` | Add zebra striping to table rows                   |
+| `hover`       | `Boolean` | `false` | Add hover effect to table rows                     |
+| `perPage`     | `Number`  | `0`     | Number of items per page (0 = no pagination)       |
+| `currentPage` | `Number`  | `0`     | Current active page                                |
+| `noResults`   | `String`  | `""`    | Message to show when no data matches filter        |
+| `topScroll`   | `Boolean` | `false` | Enable synchronized top scroll bar for wide tables |
 
 ### Events
 
@@ -375,7 +404,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Changelog
 
-### v3.0.1
+### v3.0.2
 
 - Full TypeScript rewrite
 - Improved sorting algorithm with null/undefined handling
@@ -383,3 +412,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Better filtering performance
 - Responsive design improvements
 - Added `noResults` prop for empty state customization
+- Added `topScroll` prop for synchronized top scroll bar on wide tables

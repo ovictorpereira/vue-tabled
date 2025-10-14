@@ -1,79 +1,99 @@
 <template>
-  <div class="tabled-responsive">
-    <table
-      class="tabled"
-      :class="[
-        { 'tabled-bordered': props.bordered },
-        { 'tabled-striped': props.striped },
-        { 'tabled-hover': props.hover },
-      ]"
+  <div class="tabled-container">
+    <div
+      v-if="props.topScroll"
+      ref="topScrollRef"
+      class="tabled-top-scroll"
+      @scroll="syncScrollTop"
+      v-show="showTopScroll"
     >
-      <thead>
-        <tr>
-          <th
-            scope="col"
-            v-for="(field, index) in props.fields"
-            :key="index"
-            :class="[field.class, field.thClass]"
-            @click="sortColumn(field)"
-          >
-            <span :class="field.sortable ? 'sort-by' : ''">{{
-              field.label
-            }}</span>
-          </th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <template v-for="(item, index) in paginationFilter" :key="index">
-          <tr
-            :class="[
-              { tabledRowHasDetails: item._showDetails },
-              item._rowClass,
-            ]"
-          >
-            <td
-              v-for="(field, ind) in props.fields"
-              :key="ind"
-              :class="[field.class, field.tdClass]"
-            >
-              <span v-if="$slots[field.key]">
-                <slot
-                  :name="field.key"
-                  :item="item"
-                  :value="item[field.key]"
-                  :key="field.key"
-                  :index="index"
-                  :toggleDetails="() => toggleDetails(item)"
-                ></slot>
-              </span>
-
-              <span v-else>{{ item[field.key] }}</span>
-            </td>
-          </tr>
-
-          <tr v-if="item._showDetails" class="tabled-details">
-            <td :colspan="fields.length">
-              <div class="tabled-details-card">
-                <slot name="row-details" :item="item"> </slot>
-              </div>
-            </td>
-          </tr>
-        </template>
-      </tbody>
-    </table>
+      <div
+        class="tabled-scroll-content"
+        :style="{ width: tableWidth + 'px' }"
+      ></div>
+    </div>
 
     <div
-      v-if="props.noResults && paginationFilter.length == 0"
-      class="tabled-no-results"
+      ref="tableScrollRef"
+      class="tabled-responsive"
+      @scroll="syncScrollBottom"
     >
-      {{ props.noResults }}
+      <table
+        ref="tableRef"
+        class="tabled"
+        :class="[
+          { 'tabled-bordered': props.bordered },
+          { 'tabled-striped': props.striped },
+          { 'tabled-hover': props.hover },
+        ]"
+      >
+        <thead>
+          <tr>
+            <th
+              scope="col"
+              v-for="(field, index) in props.fields"
+              :key="index"
+              :class="[field.class, field.thClass]"
+              @click="sortColumn(field)"
+            >
+              <span :class="field.sortable ? 'sort-by' : ''">{{
+                field.label
+              }}</span>
+            </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <template v-for="(item, index) in paginationFilter" :key="index">
+            <tr
+              :class="[
+                { tabledRowHasDetails: item._showDetails },
+                item._rowClass,
+              ]"
+            >
+              <td
+                v-for="(field, ind) in props.fields"
+                :key="ind"
+                :class="[field.class, field.tdClass]"
+              >
+                <span v-if="$slots[field.key]">
+                  <slot
+                    :name="field.key"
+                    :item="item"
+                    :value="item[field.key]"
+                    :key="field.key"
+                    :index="index"
+                    :toggleDetails="() => toggleDetails(item)"
+                  ></slot>
+                </span>
+
+                <span v-else>{{ item[field.key] }}</span>
+              </td>
+            </tr>
+
+            <tr v-if="item._showDetails" class="tabled-details">
+              <td :colspan="fields.length">
+                <div class="tabled-details-card">
+                  <slot name="row-details" :item="item"> </slot>
+                </div>
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+
+      <div
+        v-if="props.noResults && paginationFilter.length == 0"
+        class="tabled-no-results"
+      >
+        {{ props.noResults }}
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from "vue";
 
 interface TableField {
   key: string;
@@ -102,6 +122,7 @@ interface Props {
   perPage?: number;
   currentPage?: number;
   noResults?: string;
+  topScroll?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -114,16 +135,41 @@ const props = withDefaults(defineProps<Props>(), {
   perPage: 0,
   currentPage: 0,
   noResults: "",
+  topScroll: false,
 });
+
+const topScrollRef = ref<HTMLDivElement>();
+const tableScrollRef = ref<HTMLDivElement>();
+const tableRef = ref<HTMLTableElement>();
+
+// Variables to control the top scroll
+const showTopScroll = ref(false);
+const tableWidth = ref(0);
+const isScrollingSyncronized = ref(false);
 
 onMounted(() => {
   mountNewItems();
+  if (props.topScroll) {
+    updateScrollState();
+    window.addEventListener("resize", updateScrollState);
+  }
+});
+
+onUnmounted(() => {
+  if (props.topScroll) {
+    window.removeEventListener("resize", updateScrollState);
+  }
 });
 
 watch(
   () => props.items,
   () => {
     mountNewItems();
+    if (props.topScroll) {
+      nextTick(() => {
+        updateScrollState();
+      });
+    }
   },
   { deep: true }
 );
@@ -137,6 +183,45 @@ const mountNewItems = () => {
     _originalIndex: index,
     _uniqueId: `item-${index}-${Date.now()}-${Math.random()}`,
   }));
+};
+
+// Function to update the state of the top scroll
+const updateScrollState = () => {
+  if (!tableRef.value || !tableScrollRef.value) return;
+
+  const tableElement = tableRef.value;
+  const containerElement = tableScrollRef.value;
+
+  tableWidth.value = tableElement.scrollWidth;
+  const containerWidth = containerElement.clientWidth;
+
+  showTopScroll.value = tableWidth.value > containerWidth;
+};
+
+const syncScrollTop = (event: Event) => {
+  if (isScrollingSyncronized.value) return;
+
+  const target = event.target as HTMLElement;
+  if (tableScrollRef.value) {
+    isScrollingSyncronized.value = true;
+    tableScrollRef.value.scrollLeft = target.scrollLeft;
+    setTimeout(() => {
+      isScrollingSyncronized.value = false;
+    }, 10);
+  }
+};
+
+const syncScrollBottom = (event: Event) => {
+  if (isScrollingSyncronized.value) return;
+
+  const target = event.target as HTMLElement;
+  if (topScrollRef.value) {
+    isScrollingSyncronized.value = true;
+    topScrollRef.value.scrollLeft = target.scrollLeft;
+    setTimeout(() => {
+      isScrollingSyncronized.value = false;
+    }, 10);
+  }
 };
 
 const emit = defineEmits<{
@@ -231,6 +316,23 @@ const toggleDetails = (item: TableItem) => {
 </script>
 
 <style>
+.tabled-container {
+  position: relative;
+}
+
+.tabled-top-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  height: 20px;
+  margin-bottom: 5px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabled-scroll-content {
+  height: 1px;
+  background: transparent;
+}
+
 .tabled-responsive {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
