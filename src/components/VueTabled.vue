@@ -14,7 +14,7 @@
             scope="col"
             v-for="(field, index) in props.fields"
             :key="index"
-            :class="field.class"
+            :class="[field.class, field.thClass]"
             @click="sortColumn(field)"
           >
             <span :class="field.sortable ? 'sort-by' : ''">{{
@@ -35,7 +35,7 @@
             <td
               v-for="(field, ind) in props.fields"
               :key="ind"
-              :class="field.class"
+              :class="[field.class, field.tdClass]"
             >
               <span v-if="$slots[field.key]">
                 <slot
@@ -44,7 +44,7 @@
                   :value="item[field.key]"
                   :key="field.key"
                   :index="index"
-                  :toggleDetails="toggleDetails"
+                  :toggleDetails="() => toggleDetails(item)"
                 ></slot>
               </span>
 
@@ -75,9 +75,26 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 
+interface TableField {
+  key: string;
+  label: string;
+  sortable?: boolean;
+  class?: string;
+  thClass?: string;
+  tdClass?: string;
+}
+
+interface TableItem {
+  [key: string]: any;
+  _showDetails?: boolean;
+  _rowClass?: string;
+  _originalIndex?: number;
+  _uniqueId?: string;
+}
+
 interface Props {
-  items: any;
-  fields: any;
+  items: TableItem[];
+  fields: TableField[];
   filter?: string;
   bordered?: boolean;
   striped?: boolean;
@@ -88,8 +105,8 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  items: [],
-  fields: [],
+  items: () => [],
+  fields: () => [],
   filter: "",
   bordered: false,
   striped: false,
@@ -105,22 +122,29 @@ onMounted(() => {
 
 watch(
   () => props.items,
-  (v) => {
+  () => {
     mountNewItems();
   },
   { deep: true }
 );
 
-const newItems = ref<Array<any>>([]);
+const newItems = ref<TableItem[]>([]);
 
 const mountNewItems = () => {
-  newItems.value = props.items.map((i: any) => ({ ...i, _showDetails: false }));
+  newItems.value = props.items.map((item: TableItem, index: number) => ({
+    ...item,
+    _showDetails: false,
+    _originalIndex: index,
+    _uniqueId: `item-${index}-${Date.now()}-${Math.random()}`,
+  }));
 };
 
-const emit = defineEmits(["onFiltered"]);
+const emit = defineEmits<{
+  onFiltered: [items: TableItem[]];
+}>();
 
-const sortField = ref("");
-const sortReverse = ref(false);
+const sortField = ref<string>("");
+const sortReverse = ref<boolean>(false);
 
 const filteredTable = computed(() => {
   let items = [...newItems.value];
@@ -131,17 +155,13 @@ const filteredTable = computed(() => {
     return newItems.value;
   }
 
-  let result = items.filter((i) => {
-    let bool = false;
-
-    fields.forEach((e) => {
-      let key = e.key;
-      let data = i[key] ? i[key].toString().toUpperCase().trim() : "";
-
-      if (data.includes(props.filter.toUpperCase().trim())) bool = true;
+  const filterText = props.filter.toUpperCase().trim();
+  const result = items.filter((item) => {
+    return fields.some((field) => {
+      const value = item[field.key];
+      const data = value ? value.toString().toUpperCase().trim() : "";
+      return data.includes(filterText);
     });
-
-    return bool;
   });
 
   emit("onFiltered", result);
@@ -161,16 +181,28 @@ const sortColumn = (field: any) => {
 };
 
 const sortedTable = computed(() => {
-  let key = sortField.value;
-  let reverse = sortReverse.value;
+  const key = sortField.value;
+  const reverse = sortReverse.value;
+
   if (!key) return [...filteredTable.value];
 
-  let result = [...filteredTable.value].sort(
-    (a, b) => ((a[key] > b[key]) as any) - ((a[key] < b[key]) as any)
-  );
-  if (reverse) result = result.reverse();
+  const result = [...filteredTable.value].sort((a, b) => {
+    const aVal = a[key];
+    const bVal = b[key];
 
-  return result;
+    // Handle null/undefined values
+    if (aVal == null && bVal == null) return 0;
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
+
+    // Convert to string for comparison if not numbers
+    const aStr = typeof aVal === "number" ? aVal : String(aVal).toLowerCase();
+    const bStr = typeof bVal === "number" ? bVal : String(bVal).toLowerCase();
+
+    return aStr > bStr ? 1 : aStr < bStr ? -1 : 0;
+  });
+
+  return reverse ? result.reverse() : result;
 });
 
 const paginationFilter = computed(() => {
@@ -183,8 +215,18 @@ const paginationFilter = computed(() => {
   );
 });
 
-const toggleDetails = (index: number) => {
-  newItems.value[index]._showDetails = !newItems.value[index]._showDetails;
+const toggleDetails = (item: TableItem) => {
+  const originalIndex = newItems.value.findIndex(
+    (originalItem: TableItem) => originalItem._uniqueId === item._uniqueId
+  );
+
+  if (originalIndex !== -1) {
+    const oldValue = newItems.value[originalIndex]._showDetails;
+    newItems.value[originalIndex]._showDetails = !oldValue;
+    return;
+  } else {
+    console.log("❌ _uniqueId not found");
+  }
 };
 </script>
 
