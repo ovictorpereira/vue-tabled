@@ -437,16 +437,6 @@ const toggleDetails = (item: TableItem) => {
   top: calc(50% + 1px);
 }
 
-.tabled .sort-by:before {
-  border-bottom-color: #666;
-  margin-top: -9px;
-}
-
-.tabled .sort-by:after {
-  border-top-color: #666;
-  margin-top: 1px;
-}
-
 .tabledRowHasDetails {
   border-bottom: 0 !important;
 }
