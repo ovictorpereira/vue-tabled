@@ -407,9 +407,12 @@ const toggleDetails = (item: TableItem) => {
 
 .tabled th .sort-by {
   position: relative;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   cursor: pointer;
+  padding-right: 20px;
 }
 
 .tabled .sort-by:before,
@@ -418,10 +421,20 @@ const toggleDetails = (item: TableItem) => {
   content: "";
   display: block;
   height: 0;
-  right: 5px;
-  top: 50%;
   position: absolute;
+  right: 5px;
   width: 0;
+  flex-shrink: 0;
+}
+
+.tabled .sort-by:before {
+  border-bottom-color: #666;
+  top: calc(50% - 9px);
+}
+
+.tabled .sort-by:after {
+  border-top-color: #666;
+  top: calc(50% + 1px);
 }
 
 .tabled .sort-by:before {
